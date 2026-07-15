@@ -10,11 +10,12 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-func consumer() {
+func main() {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost:9092",
-		"group.id":          "order-service",
-		"auto.offset.reset": "earliest",
+		"bootstrap.servers":        "localhost:9092",
+		"group.id":                 "order-service",
+		"auto.offset.reset":        "earliest",
+		"enable.auto.offset.store": true,
 	})
 
 	if err != nil {
@@ -32,6 +33,7 @@ func consumer() {
 		case <-sigchan:
 			run = false
 		default:
+			fmt.Println("Waiting for the producer...")
 			ev := c.Poll(100) //even value
 			if ev == nil {
 				continue
@@ -39,11 +41,7 @@ func consumer() {
 
 			switch msg := ev.(type) {
 			case *kafka.Message:
-				fmt.Printf("got message from kafka of topic : %s: %s\n", msg.TopicPartition, string(msg.Value))
-				_, err := c.StoreMessage(msg)
-				if err != nil {
-					fmt.Printf("store offset failed: %v\n", err)
-				}
+				fmt.Printf("got message from kafka of topic : %s: %s\n", *msg.TopicPartition.Topic, string(msg.Value))
 			case kafka.Error:
 				fmt.Printf("Kafka error %v \n", msg)
 			}
