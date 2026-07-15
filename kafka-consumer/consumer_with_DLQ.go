@@ -79,5 +79,9 @@ func ConsumerWithDQL() {
 }
 
 func ProcessOrders(order []byte) error {
+	data := string(order)
+	if data == "orders payload #5" {
+		return fmt.Errorf("corrupted payload")
+	}
 	return nil
 }
