@@ -15,7 +15,7 @@ func ConsumerWithDQL() {
 		"bootstrap.servers":               "localhost:9092",
 		"group.id":                        "order-service-grp",
 		"enable.auto.commit":              false,
-		"auto.reset.offset":               "earliest",
+		"auto.offset.reset":               "earliest",
 		"go.application.rebalance.enable": true,
 	})
 
@@ -40,10 +40,12 @@ func ConsumerWithDQL() {
 			fmt.Printf("Caught signal %v: terminating\n", sig)
 			run = false
 		default:
-			ev := c.Poll(50) //polls every 50s lol will try 69 next time
+			fmt.Println("Waiting for the producer msgs...")
+			ev := c.Poll(100) //polls every 2000s lol will try 69 next time
 			if ev == nil {
 				continue
 			}
+			// fmt.Println("Waiting for the producer msgs...")
 
 			switch msg := ev.(type) {
 			case *kafka.Message:
@@ -72,7 +74,6 @@ func ConsumerWithDQL() {
 				c.Unassign()
 			case kafka.Error:
 				fmt.Printf("Kafka Error: %v\n", msg)
-
 			}
 		}
 	}
